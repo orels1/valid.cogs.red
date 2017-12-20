@@ -1,7 +1,7 @@
 {
-  "name": "coub2gfycat",
+  "name": "valid.cogs.red",
   "version": "1.0.0",
-  "description": "coub to gfycat transfer tool",
+  "description": "Repo validation tool for Cogs.Red",
   "author": "orels1 <orel-s1@yandex.ru>",
   "private": true,
   "scripts": {
