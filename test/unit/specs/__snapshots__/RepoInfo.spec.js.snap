@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RepoInfo component sets default props 1`] = `
+Object {
+  "code": Object {},
+  "type": "default",
+}
+`;
