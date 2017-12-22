@@ -1,10 +1,10 @@
 <template lang="pug">
   div(:class="[$style.repoInfo, barStyle]")
     div(
-      :v-if="status"
+      v-if="status"
       :class="$style.statusLine"
       ) {{status}}
-    div(:class="$style.innerBlock" :v-if="info.length !== 0")
+    div(:class="$style.innerBlock" v-if="info.length !== 0")
       div(v-for="row in info" :key="row.key")
         |#[b {{row.key}}:] {{row.val}}
 </template>

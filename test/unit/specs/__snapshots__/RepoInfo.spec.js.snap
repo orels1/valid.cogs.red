@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`RepoInfo component inner block renders supplied code info 1`] = `
+<div class="innerBlock">
+    <div>
+        <b>AUTHOR:</b> foobar</div>
+    <div>
+        <b>NAME:</b> fizzbuzz</div>
+</div>
+`;
+
 exports[`RepoInfo component sets default props 1`] = `
 Object {
   "code": Object {},
