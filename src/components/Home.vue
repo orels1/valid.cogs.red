@@ -5,12 +5,12 @@ div
     v-model="repoUrl"
     placeholder="Paste GitHub Repo URL and press Enter"
     @keyup="validate"
-    @keydown.enter="load"
+    @keydown.enter="graphqlLoad"
   )
   br
   button(
     :class="$style.load"
-    @click="load"
+    @click="graphqlLoad"
     :disabled="urlError || urlEmpty || fetching"
   ) {{ !fetched && "validate repo" || "validate again" }}
   br
@@ -99,6 +99,68 @@ export default class Home extends Vue {
     await this.loadCogsData(username, repo);
     this.fetching = false;
     this.fetched = true; // for custom button name
+  }
+
+  async graphqlLoad() {
+    if (this.urlError) return;
+    this.fetching = true;
+    const repoUrlArr = this.repoUrl.split('/');
+    const endsWithSlash = this.repoUrl.endsWith('/');
+    const shift = endsWithSlash ? 1 : 0;
+    const username = repoUrlArr[repoUrlArr.length - 2 - shift];
+    const repo = repoUrlArr[repoUrlArr.length - 1 - shift];
+    const result = await github.graphql(username, repo);
+
+    // check global errors
+    if (result.error) {
+      this.repoStatusMessage = result.error;
+      this.jsonStatus = 'error';
+      this.repoJson = result;
+      return;
+    }
+
+    // check repo errors
+    if (result.repo.error) {
+      this.repoStatusMessage = result.repo.error;
+      this.jsonStatus = 'error';
+      this.repoJson = {};
+      return;
+    }
+
+    // set repo status & data
+    this.repoStatusMessage = 'repo info.json is valid';
+    this.jsonStatus = 'success';
+    this.repoJson = result.repo;
+
+    // check cogs errors
+    if (result.cogs.error) {
+      this.cogsStatusMessage = result.cogs.error;
+      this.cogsStatus = 'error';
+      this.cogsJson = {};
+      return;
+    }
+
+    // check if there are missing or broken cogs
+    if (result.cogs.broken.length) {
+      this.cogsStatus = 'error';
+      this.cogsStatusMessage = `There are some broken ${result.cogs.missing.length ? 'and missing' : ''} cog info.jsons present, check lists below. Those cogs won't be parsed by cogs.red`;
+    } else if (result.cogs.missing.length) {
+      this.cogsStatus = 'warning';
+      this.cogsStatusMessage = 'There are cogs that do not have info.json files, check the list below. Those cogs won\'t be parsed by cogs.red';
+    } else {
+      this.cogsStatus = 'success';
+      this.cogsStatusMessage = 'All found info.jsons are fine, good work!';
+    }
+    this.cogsJson = {
+      SUCCESSFULLY_LOADED: `${result.cogs.valid.length} cogs`,
+      COGS_LIST: result.cogs.valid,
+      BROKEN_COGS: result.cogs.broken.length ? result.cogs.broken : undefined,
+      COGS_WITHOUT_JSONS: result.cogs.missing.length ? result.cogs.missing : undefined,
+    };
+
+    // end fetching
+    this.fetching = false;
+    this.fetched = true;
   }
 
   async loadCogsData(username, repo) {
